@@ -2,10 +2,11 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configurar para escutar na porta correta (Render usa porta dinâmica)
+// *** CONFIGURAÇÃO CRÍTICA PARA O RENDER ***
+// Permite que a aplicação escute na porta fornecida pela variável de ambiente PORT
 builder.WebHost.ConfigureKestrel(options =>
 {
-    var port = Environment.GetEnvironmentVariable("PORT") ?? "5090";
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "5090"; // 5090 é a porta local padrão
     options.ListenAnyIP(int.Parse(port));
 });
 
@@ -32,7 +33,8 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddHttpClient();
 
-// Configurar URL da API baseada no ambiente
+// *** CONFIGURAÇÃO DO HttpClient PARA CONSUMIR A API ***
+// Ele vai pegar a URL base da API do arquivo de configuração
 builder.Services.AddScoped(sp => new HttpClient
 {
     BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5154")
@@ -47,12 +49,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// Redirecionamento HTTPS: em produção, o Render gerencia isso
-if (app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
-
+// app.UseHttpsRedirection(); // Comentado, pois o Render gerencia o SSL no nível do proxy.
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -61,13 +58,16 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseSession();
 
+// *** ROTA PADRÃO - DEVE APONTAR PARA O CONTROLLER DE LOGIN ***
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Login}/{action=Index}/{id?}");
+    pattern: "{controller=Login}/{action=Index}/{id?}"); // A página inicial é a de Login
 
 // Log de inicialização
+Console.WriteLine("=========================================");
 Console.WriteLine("Aplicação Web iniciada com sucesso!");
 Console.WriteLine($"Ambiente: {app.Environment.EnvironmentName}");
-Console.WriteLine($"URLs: http://localhost:{Environment.GetEnvironmentVariable("PORT") ?? "5090"}");
+Console.WriteLine($"URL: https://localhost:{Environment.GetEnvironmentVariable("PORT") ?? "5090"}");
+Console.WriteLine("=========================================");
 
 app.Run();
