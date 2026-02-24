@@ -8,7 +8,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// ★ SOLUÇÃO: Adicionar CORS
+// Configurar CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -20,9 +20,9 @@ builder.Services.AddCors(options =>
         });
 });
 
-// Configurar DbContext com SQL Server
+// ★ CORRIGIDO: Configurar DbContext com PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
@@ -33,10 +33,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// ★ IMPORTANTE: Usar CORS antes do HttpsRedirection
 app.UseCors("AllowAll");
 
-app.UseHttpsRedirection();
+// ★ CORRIGIDO: Remover HttpsRedirection se não for usar HTTPS no Render
+// app.UseHttpsRedirection(); // Comente ou remova esta linha
+
 app.UseAuthorization();
 app.MapControllers();
 

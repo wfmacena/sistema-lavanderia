@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SistemaLavanderia.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialPostgres : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,13 +18,13 @@ namespace SistemaLavanderia.Infrastructure.Migrations
                 name: "Clientes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Telefone = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Endereco = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DataCadastro = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Nome = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Telefone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Endereco = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    DataCadastro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -34,12 +35,12 @@ namespace SistemaLavanderia.Infrastructure.Migrations
                 name: "Servicos",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Descricao = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PrecoBase = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    UnidadeMedida = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Nome = table.Column<string>(type: "text", nullable: false),
+                    Descricao = table.Column<string>(type: "text", nullable: true),
+                    PrecoBase = table.Column<decimal>(type: "numeric", nullable: false),
+                    UnidadeMedida = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -50,13 +51,13 @@ namespace SistemaLavanderia.Infrastructure.Migrations
                 name: "Usuarios",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SenhaHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Perfil = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DataCadastro = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Nome = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    SenhaHash = table.Column<string>(type: "text", nullable: false),
+                    Perfil = table.Column<string>(type: "text", nullable: false),
+                    DataCadastro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -67,15 +68,15 @@ namespace SistemaLavanderia.Infrastructure.Migrations
                 name: "Pedidos",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ClienteId = table.Column<int>(type: "int", nullable: false),
-                    UsuarioId = table.Column<int>(type: "int", nullable: false),
-                    DataPedido = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DataPrevistaEntrega = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ValorTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Observacoes = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ClienteId = table.Column<int>(type: "integer", nullable: false),
+                    UsuarioId = table.Column<int>(type: "integer", nullable: false),
+                    DataPedido = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DataPrevistaEntrega = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    ValorTotal = table.Column<decimal>(type: "numeric", nullable: false),
+                    Observacoes = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -98,10 +99,10 @@ namespace SistemaLavanderia.Infrastructure.Migrations
                 name: "ItensPedido",
                 columns: table => new
                 {
-                    PedidoId = table.Column<int>(type: "int", nullable: false),
-                    ServicoId = table.Column<int>(type: "int", nullable: false),
-                    Quantidade = table.Column<int>(type: "int", nullable: false),
-                    PrecoUnitario = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    PedidoId = table.Column<int>(type: "integer", nullable: false),
+                    ServicoId = table.Column<int>(type: "integer", nullable: false),
+                    Quantidade = table.Column<int>(type: "integer", nullable: false),
+                    PrecoUnitario = table.Column<decimal>(type: "numeric", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -134,7 +135,7 @@ namespace SistemaLavanderia.Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "Usuarios",
                 columns: new[] { "Id", "DataCadastro", "Email", "Nome", "Perfil", "SenhaHash" },
-                values: new object[] { 1, new DateTime(2026, 2, 23, 14, 49, 16, 590, DateTimeKind.Local).AddTicks(1368), "admin@lavanderia.com", "Administrador", "Admin", "123456" });
+                values: new object[] { 1, new DateTime(2026, 2, 23, 22, 28, 38, 854, DateTimeKind.Local).AddTicks(2950), "admin@lavanderia.com", "Administrador", "Admin", "123456" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ItensPedido_ServicoId",
