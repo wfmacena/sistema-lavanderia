@@ -2,6 +2,13 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configurar para escutar na porta correta (Render usa porta dinâmica)
+builder.WebHost.ConfigureKestrel(options =>
+{
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "5090";
+    options.ListenAnyIP(int.Parse(port));
+});
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -25,6 +32,12 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddHttpClient();
 
+// Configurar URL da API baseada no ambiente
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5154")
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -34,18 +47,27 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Redirecionamento HTTPS: em produção, o Render gerencia isso
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseStaticFiles();
 
 app.UseRouting();
 
-// IMPORTANTE: UseAuthentication antes do UseAuthorization
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Login}/{action=Index}/{id?}"); // MUDAMOS A PÁGINA INICIAL PARA LOGIN
+    pattern: "{controller=Login}/{action=Index}/{id?}");
+
+// Log de inicialização
+Console.WriteLine("Aplicação Web iniciada com sucesso!");
+Console.WriteLine($"Ambiente: {app.Environment.EnvironmentName}");
+Console.WriteLine($"URLs: http://localhost:{Environment.GetEnvironmentVariable("PORT") ?? "5090"}");
 
 app.Run();
