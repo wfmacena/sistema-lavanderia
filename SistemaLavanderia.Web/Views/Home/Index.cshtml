@@ -1,0 +1,160 @@
+﻿@{
+    ViewData["Title"] = "Sistema de Lavanderia Profissional";
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container hero-content">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="hero-title">
+                    <i class="fas fa-tshirt me-3"></i>Sistema de Lavanderia
+                </h1>
+                <p class="hero-subtitle">
+                    Gerencie sua lavanderia de forma profissional e eficiente.
+                    Controle clientes, serviços e pedidos em um só lugar.
+                </p>
+                <div class="hero-buttons">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a href="/Clientes" class="btn btn-hero btn-hero-primary">
+                            <i class="fas fa-users me-2"></i>Gerenciar Clientes
+                        </a>
+                        <a href="/Pedidos" class="btn btn-hero btn-hero-outline">
+                            <i class="fas fa-shopping-cart me-2"></i>Ver Pedidos
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="/Login/Index" class="btn btn-hero btn-hero-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>Acessar Sistema
+                        </a>
+                        <a href="#features" class="btn btn-hero btn-hero-outline">
+                            <i class="fas fa-info-circle me-2"></i>Conheça Mais
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section" id="features">
+    <div class="container">
+        <div class="section-title">
+            <h2>Por que escolher nosso sistema?</h2>
+            <p>Uma solução completa para gerenciar sua lavanderia com eficiência e profissionalismo</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Gestão de Clientes</h3>
+                    <p>Cadastre e gerencie todos os seus clientes com informações completas e histórico de pedidos.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <h3>Serviços Personalizados</h3>
+                    <p>Configure diferentes tipos de serviços, preços e unidades de medida.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3>Controle de Pedidos</h3>
+                    <p>Acompanhe o status dos pedidos em tempo real: aguardando, lavando, pronto ou entregue.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h3>Cálculo Automático</h3>
+                    <p>O sistema calcula automaticamente o valor total dos pedidos baseado nos serviços selecionados.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Relatórios</h3>
+                    <p>Acompanhe o desempenho do seu negócio com relatórios detalhados.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Segurança</h3>
+                    <p>Sistema com autenticação e níveis de acesso para maior segurança dos dados.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Clientes Atendidos</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <div class="stat-number">1000+</div>
+                    <div class="stat-label">Pedidos Realizados</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <div class="stat-number">4+</div>
+                    <div class="stat-label">Tipos de Serviço</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <div class="stat-number">99%</div>
+                    <div class="stat-label">Satisfação</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2 class="cta-title">Pronto para começar?</h2>
+        <p class="cta-text">
+            Acesse agora mesmo o sistema e comece a gerenciar sua lavanderia de forma profissional.
+        </p>
+        @if (User.Identity.IsAuthenticated)
+        {
+            <a href="/Pedidos/Create" class="btn btn-cta">
+                <i class="fas fa-plus-circle me-2"></i>Criar Novo Pedido
+            </a>
+        }
+        else
+        {
+            <a href="/Login/Index" class="btn btn-cta">
+                <i class="fas fa-sign-in-alt me-2"></i>Acessar Sistema
+            </a>
+        }
+    </div>
+</section>

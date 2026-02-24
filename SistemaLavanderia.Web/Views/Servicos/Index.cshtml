@@ -1,0 +1,95 @@
+﻿@model IEnumerable<SistemaLavanderia.Core.Entities.Servico>
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "Serviços de Lavanderia";
+    var perfil = User.FindFirst("Perfil")?.Value ?? "Cliente";
+}
+
+<h1>Serviços de Lavanderia</h1>
+
+@if (perfil == "Admin")
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Novo Serviço
+        </a>
+    </p>
+}
+
+@if (TempData["Sucesso"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> @TempData["Sucesso"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Erro"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> @TempData["Erro"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.Nome)</th>
+                <th>@Html.DisplayNameFor(model => model.Descricao)</th>
+                <th>@Html.DisplayNameFor(model => model.PrecoBase)</th>
+                <th>@Html.DisplayNameFor(model => model.UnidadeMedida)</th>
+                @if (perfil == "Admin")
+                {
+                    <th>Ações</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td><strong>@item.Nome</strong></td>
+                    <td>@item.Descricao</td>
+                    <td>@item.PrecoBase.ToString("C")</td>
+                    <td>@item.UnidadeMedida</td>
+                    @if (perfil == "Admin")
+                    {
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info text-center">
+        <i class="fas fa-info-circle fa-2x mb-3"></i>
+        <p class="mb-0">Nenhum serviço cadastrado.</p>
+    </div>
+}
+
+@if (perfil == "Cliente")
+{
+    <div class="alert alert-info mt-3">
+        <i class="fas fa-info-circle"></i> 
+        Para solicitar um serviço, clique em <strong>"Solicitar Serviço"</strong> no menu superior.
+    </div>
+}
+
+<style>
+    .table td {
+        vertical-align: middle;
+    }
+</style>

@@ -1,0 +1,169 @@
+﻿@model IEnumerable<SistemaLavanderia.Core.Entities.Pedido>
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "Pedidos";
+    var perfil = User.FindFirst("Perfil")?.Value ?? "Cliente";
+}
+
+<h1>Pedidos</h1>
+
+@if (TempData["Sucesso"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> @TempData["Sucesso"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Erro"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> @TempData["Erro"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Data Pedido</th>
+                <th>Data Entrega</th>
+                <th>Status</th>
+                <th>Valor Total</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>
+                        @if (item.Cliente != null)
+                        {
+                            <strong>@item.Cliente.Nome</strong>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Cliente ID: @item.ClienteId</span>
+                        }
+                    </td>
+                    <td>@item.DataPedido.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@(item.DataPrevistaEntrega?.ToString("dd/MM/yyyy") ?? "-")</td>
+                    <td>
+                        <span class="badge @(item.Status switch {
+                            "Aguardando" => "bg-warning",
+                            "Lavando" => "bg-info",
+                            "Pronto" => "bg-success",
+                            "Entregue" => "bg-secondary",
+                            "Cancelado" => "bg-danger",
+                            _ => "bg-primary"
+                        }) fs-6">@item.Status</span>
+                    </td>
+                    <td><strong>@item.ValorTotal.ToString("C")</strong></td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <!-- Detalhes - todos podem ver -->
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Detalhes">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            
+                            @if (perfil == "Admin")
+                            {
+                                <!-- ADMIN: Pode alterar status (dropdown) -->
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-warning dropdown-toggle" data-bs-toggle="dropdown" title="Alterar Status">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <form asp-action="UpdateStatus" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <button type="submit" name="status" value="Aguardando" class="dropdown-item">
+                                                    <i class="fas fa-clock text-warning"></i> Aguardando
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li>
+                                            <form asp-action="UpdateStatus" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <button type="submit" name="status" value="Lavando" class="dropdown-item">
+                                                    <i class="fas fa-water text-info"></i> Lavando
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li>
+                                            <form asp-action="UpdateStatus" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <button type="submit" name="status" value="Pronto" class="dropdown-item">
+                                                    <i class="fas fa-check-circle text-success"></i> Pronto
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li>
+                                            <form asp-action="UpdateStatus" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <button type="submit" name="status" value="Entregue" class="dropdown-item">
+                                                    <i class="fas fa-truck text-secondary"></i> Entregue
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form asp-action="UpdateStatus" method="post" style="display: inline;">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <button type="submit" name="status" value="Cancelado" class="dropdown-item text-danger">
+                                                    <i class="fas fa-ban"></i> Cancelado
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                            
+                            @if (perfil == "Admin" || (perfil == "Cliente" && item.Status == "Aguardando"))
+                            {
+                                <!-- CLIENTE: Só pode cancelar se estiver "Aguardando" -->
+                                <!-- ADMIN: Pode excluir qualquer pedido -->
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" title="Cancelar Pedido">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info text-center">
+        <i class="fas fa-info-circle fa-2x mb-3"></i>
+        <p class="mb-0">Nenhum pedido cadastrado.</p>
+        @if (perfil == "Cliente")
+        {
+            <a href="/Solicitacao/NovoPedido" class="btn btn-primary mt-3">
+                <i class="fas fa-plus-circle"></i> Fazer meu primeiro pedido
+            </a>
+        }
+    </div>
+}
+
+<style>
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.8rem;
+    }
+</style>

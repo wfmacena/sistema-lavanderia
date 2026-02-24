@@ -1,0 +1,125 @@
+﻿@model SistemaLavanderia.Core.Entities.Usuario
+@{
+    ViewData["Title"] = "Meu Perfil";
+    var cliente = ViewBag.Cliente as SistemaLavanderia.Core.Entities.Cliente;
+}
+
+<h1>Meu Perfil</h1>
+
+@if (TempData["Sucesso"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> @TempData["Sucesso"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Erro"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> @TempData["Erro"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="dados-tab" data-bs-toggle="tab" data-bs-target="#dados" type="button" role="tab">
+            <i class="fas fa-user"></i> Dados Pessoais
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="senha-tab" data-bs-toggle="tab" data-bs-target="#senha" type="button" role="tab">
+            <i class="fas fa-lock"></i> Alterar Senha
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <!-- Aba de Dados Pessoais -->
+    <div class="tab-pane fade show active" id="dados" role="tabpanel">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Informações Pessoais</h5>
+            </div>
+            <div class="card-body">
+                @if (cliente != null)
+                {
+                    <form asp-action="AtualizarCliente" method="post">
+                        <input type="hidden" name="Id" value="@cliente.Id" />
+                        <input type="hidden" name="DataCadastro" value="@cliente.DataCadastro" />
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Nome</label>
+                                <input type="text" name="Nome" class="form-control" value="@cliente.Nome" required />
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">E-mail</label>
+                                <input type="email" class="form-control" value="@cliente.Email" readonly disabled />
+                                <small class="text-muted">E-mail não pode ser alterado</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Telefone</label>
+                                <input type="text" name="Telefone" class="form-control" value="@cliente.Telefone" id="telefone" required />
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Endereço</label>
+                                <textarea name="Endereco" class="form-control" rows="2">@cliente.Endereco</textarea>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Salvar Alterações
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba de Alterar Senha -->
+    <div class="tab-pane fade" id="senha" role="tabpanel">
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">Alterar Senha</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="AlterarSenha" method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Senha Atual</label>
+                            <input type="password" name="senhaAtual" class="form-control" required />
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Nova Senha</label>
+                            <input type="password" name="novaSenha" class="form-control" required />
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Confirmar Nova Senha</label>
+                            <input type="password" name="confirmarSenha" class="form-control" required />
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-key"></i> Alterar Senha
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('telefone').addEventListener('input', function(e) {
+            var x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+            e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+        });
+    </script>
+}

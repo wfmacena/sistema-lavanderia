@@ -1,0 +1,79 @@
+﻿@model SistemaLavanderia.Core.Entities.Cliente
+
+@{
+    ViewData["Title"] = "Novo Cliente";
+}
+
+<h1>Novo Cliente</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="Nome" class="control-label fw-bold"></label>
+                <input asp-for="Nome" class="form-control" placeholder="Digite o nome completo" />
+                <span asp-validation-for="Nome" class="text-danger"></span>
+                <small class="form-text text-muted">Mínimo 3 caracteres</small>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Telefone" class="control-label fw-bold"></label>
+                <input asp-for="Telefone" class="form-control" placeholder="(11) 99999-9999" id="telefone" />
+                <span asp-validation-for="Telefone" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Email" class="control-label fw-bold"></label>
+                <input asp-for="Email" class="form-control" placeholder="cliente@email.com" type="email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Endereco" class="control-label fw-bold"></label>
+                <textarea asp-for="Endereco" class="form-control" rows="2" placeholder="Rua, número, bairro, cidade"></textarea>
+                <span asp-validation-for="Endereco" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Instruções</h5>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Todos os campos com <span class="text-danger">*</span> são obrigatórios</li>
+                    <li>O nome deve ter pelo menos 3 caracteres</li>
+                    <li>O telefone será validado</li>
+                    <li>O e-mail deve ser válido (opcional)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Máscara para telefone
+        document.getElementById('telefone').addEventListener('input', function(e) {
+            var x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+            e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+        });
+    </script>
+}

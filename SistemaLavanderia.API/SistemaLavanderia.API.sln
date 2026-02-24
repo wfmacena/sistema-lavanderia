@@ -1,0 +1,47 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36811.4 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SistemaLavanderia.API", "SistemaLavanderia.API.csproj", "{5F3F1776-39E9-40AE-B6D3-1ACA53B36EA1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6B0FF033-1C08-4E13-8C29-2A3EF77ED0B9} = {6B0FF033-1C08-4E13-8C29-2A3EF77ED0B9}
+		{EABD833F-CB94-4885-9DD9-974C395AA4EB} = {EABD833F-CB94-4885-9DD9-974C395AA4EB}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SistemaLavanderia.Core", "..\SistemaLavanderia.Core\SistemaLavanderia.Core.csproj", "{EABD833F-CB94-4885-9DD9-974C395AA4EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SistemaLavanderia.Infrastructure", "..\SistemaLavanderia.Infrastructure\SistemaLavanderia.Infrastructure.csproj", "{6B0FF033-1C08-4E13-8C29-2A3EF77ED0B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SistemaLavanderia.Web", "..\SistemaLavanderia.Web\SistemaLavanderia.Web.csproj", "{3EA62D2C-7B1B-4E81-850A-95934B954D71}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5F3F1776-39E9-40AE-B6D3-1ACA53B36EA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F3F1776-39E9-40AE-B6D3-1ACA53B36EA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F3F1776-39E9-40AE-B6D3-1ACA53B36EA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F3F1776-39E9-40AE-B6D3-1ACA53B36EA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EABD833F-CB94-4885-9DD9-974C395AA4EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EABD833F-CB94-4885-9DD9-974C395AA4EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EABD833F-CB94-4885-9DD9-974C395AA4EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EABD833F-CB94-4885-9DD9-974C395AA4EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B0FF033-1C08-4E13-8C29-2A3EF77ED0B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B0FF033-1C08-4E13-8C29-2A3EF77ED0B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B0FF033-1C08-4E13-8C29-2A3EF77ED0B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B0FF033-1C08-4E13-8C29-2A3EF77ED0B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EA62D2C-7B1B-4E81-850A-95934B954D71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EA62D2C-7B1B-4E81-850A-95934B954D71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EA62D2C-7B1B-4E81-850A-95934B954D71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EA62D2C-7B1B-4E81-850A-95934B954D71}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7F76CF23-318E-45A9-B6E7-4571EEB82FA6}
+	EndGlobalSection
+EndGlobal

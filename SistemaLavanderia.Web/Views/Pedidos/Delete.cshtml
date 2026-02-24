@@ -1,0 +1,130 @@
+﻿@model SistemaLavanderia.Core.Entities.Pedido
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "Cancelar Pedido";
+    var perfil = User.FindFirst("Perfil")?.Value ?? "Cliente";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Confirmar Cancelamento</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="text-center mb-4">Tem certeza que deseja cancelar este pedido?</h5>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle"></i> Esta ação não pode ser desfeita.
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0">Detalhes do Pedido #@Model.Id</h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Cliente:</th>
+                                    <td>
+                                        @if (Model.Cliente != null)
+                                        {
+                                            <strong>@Model.Cliente.Nome</strong>
+                                        }
+                                        else
+                                        {
+                                            <span>Cliente ID: @Model.ClienteId</span>
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Data do Pedido:</th>
+                                    <td>@Model.DataPedido.ToString("dd/MM/yyyy HH:mm")</td>
+                                </tr>
+                                <tr>
+                                    <th>Data Prevista:</th>
+                                    <td>@(Model.DataPrevistaEntrega?.ToString("dd/MM/yyyy") ?? "Não definida")</td>
+                                </tr>
+                                <tr>
+                                    <th>Status:</th>
+                                    <td>
+                                        <span class="badge @(Model.Status switch {
+                                            "Aguardando" => "bg-warning",
+                                            "Lavando" => "bg-info",
+                                            "Pronto" => "bg-success",
+                                            "Entregue" => "bg-secondary",
+                                            "Cancelado" => "bg-danger",
+                                            _ => "bg-primary"
+                                        })">@Model.Status</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Valor Total:</th>
+                                    <td><strong class="text-success">@Model.ValorTotal.ToString("C")</strong></td>
+                                </tr>
+                            </table>
+
+                            @if (Model.ItensPedido != null && Model.ItensPedido.Any())
+                            {
+                                <h6 class="mt-3">Itens do Pedido:</h6>
+                                <ul class="list-group">
+                                    @foreach (var item in Model.ItensPedido)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span>
+                                                @(item.Servico != null ? item.Servico.Nome : $"Serviço #{item.ServicoId}")
+                                                <span class="badge bg-secondary">@item.Quantidade</span>
+                                            </span>
+                                            <span class="text-success">@item.Subtotal.ToString("C")</span>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Observacoes))
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-comment"></i> <strong>Observações:</strong> @Model.Observacoes
+                        </div>
+                    }
+
+                    <form asp-action="Delete" method="post" class="mt-4">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Confirmar Cancelamento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .table-borderless th {
+        font-weight: 600;
+        color: #555;
+    }
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+    }
+    .list-group-item {
+        padding: 0.5rem 1rem;
+    }
+</style>

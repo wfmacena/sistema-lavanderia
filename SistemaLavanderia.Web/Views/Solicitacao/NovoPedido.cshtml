@@ -1,0 +1,419 @@
+﻿@model SistemaLavanderia.Web.Models.SolicitacaoPedidoViewModel
+@using SistemaLavanderia.Core.Enums
+@using SistemaLavanderia.Web.Services
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "Solicitar Serviço";
+    var perfil = User.FindFirst("Perfil")?.Value ?? "Cliente";
+    var usuarioId = User.FindFirst("UsuarioId")?.Value ?? "1";
+}
+
+<h1 class="mb-4">Solicitar Serviço de Lavanderia</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Dados do Pedido</h5>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.ClienteNome))
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-user"></i> Cliente: <strong>@Model.ClienteNome</strong>
+                    </div>
+                }
+
+                @if (perfil == "Admin" && Model.ClienteId == 0)
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <strong>Modo Administrador:</strong> Você precisa selecionar um cliente antes de finalizar o pedido.
+                    </div>
+                }
+
+                <form asp-action="FinalizarPedido" method="post" id="formPedido">
+                    <input type="hidden" asp-for="ClienteId" id="clienteId" value="@Model.ClienteId" />
+                    <input type="hidden" id="perfilUsuario" value="@perfil" />
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="TipoServico" class="form-label fw-bold"></label>
+                            <select asp-for="TipoServico" class="form-select" id="tipoServico" required>
+                                <option value="">Selecione o tipo de serviço</option>
+                                @foreach (var servico in ViewBag.TiposServico)
+                                {
+                                    <option value="@servico.Key">@servico.Value</option>
+                                }
+                            </select>
+                            <span asp-validation-for="TipoServico" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DataPrevistaEntrega" class="form-label fw-bold"></label>
+                            <input asp-for="DataPrevistaEntrega" class="form-control" type="date" id="dataEntrega" value="@DateTime.Now.AddDays(3).ToString("yyyy-MM-dd")" />
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0"><i class="fas fa-tshirt"></i> Itens do Pedido</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="itens-container">
+                                <!-- Itens serão adicionados aqui via JavaScript -->
+                            </div>
+
+                            <button type="button" class="btn btn-success mt-2" id="btnAdicionarItem" disabled>
+                                <i class="fas fa-plus"></i> Adicionar Peça
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-calculator"></i> Resumo</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <p class="mb-1 fw-bold">Valor Total:</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <h3 class="text-primary" id="valorTotal">R$ 0,00</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Observacoes" class="form-label fw-bold"></label>
+                        <textarea asp-for="Observacoes" class="form-control" rows="3" id="observacoes" placeholder="Observações adicionais..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg" id="btnFinalizar" disabled>
+                        <i class="fas fa-check-circle"></i> Finalizar Pedido
+                    </button>
+                    <a href="/Perfil/MeusPedidos" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0"><i class="fas fa-clock"></i> Prazos</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check-circle text-success"></i> Lavagem Simples: 2 dias</li>
+                    <li><i class="fas fa-check-circle text-success"></i> Lavagem a Seco: 3 dias</li>
+                    <li><i class="fas fa-check-circle text-success"></i> Passadoria: 1 dia</li>
+                    <li><i class="fas fa-check-circle text-success"></i> Tinturaria: 5 dias</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-tag"></i> Tabela de Preços</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Peça</th>
+                                <th>Simples</th>
+                                <th>Seco</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Camisa</td><td>R$ 8</td><td>R$ 15</td></tr>
+                            <tr><td>Calça</td><td>R$ 10</td><td>R$ 18</td></tr>
+                            <tr><td>Vestido</td><td>R$ 15</td><td>R$ 25</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // PEGAR O ID DO USUÁRIO LOGADO
+        var usuarioId = @usuarioId;
+        var perfil = '@perfil';
+        
+        var contadorItens = 0;
+        var precosPorRoupa = {};
+
+        // MAPEAMENTO DE TIPOS DE SERVIÇO PARA IDs REAIS NO BANCO
+        var mapaServicos = {
+            "1": 1, // Lavagem Simples
+            "2": 2, // Lavagem a Seco
+            "3": 3, // Passadoria
+            "4": 4, // Lavagem Pesada
+            "5": 5  // Tinturaria
+        };
+
+        // Quando selecionar o tipo de serviço
+        document.getElementById('tipoServico').addEventListener('change', function() {
+            var servicoId = this.value;
+            if (servicoId) {
+                document.getElementById('btnAdicionarItem').disabled = false;
+                
+                fetch(`/Solicitacao/ObterRoupasPorServico?servico=${servicoId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        precosPorRoupa = {};
+                        data.forEach(item => {
+                            precosPorRoupa[item.id] = item.precoBase;
+                        });
+                        
+                        document.getElementById('itens-container').innerHTML = '';
+                        contadorItens = 0;
+                        atualizarBotaoFinalizar();
+                        document.getElementById('valorTotal').textContent = 'R$ 0,00';
+                    });
+            } else {
+                document.getElementById('btnAdicionarItem').disabled = true;
+            }
+        });
+
+        // Adicionar item
+        document.getElementById('btnAdicionarItem').addEventListener('click', function() {
+            var servicoId = document.getElementById('tipoServico').value;
+            if (!servicoId) {
+                alert('Selecione o tipo de serviço primeiro');
+                return;
+            }
+
+            fetch(`/Solicitacao/ObterRoupasPorServico?servico=${servicoId}`)
+                .then(response => response.json())
+                .then(data => {
+                    adicionarLinhaItem(data);
+                });
+        });
+
+        function adicionarLinhaItem(roupas) {
+            var container = document.getElementById('itens-container');
+            var novaLinha = document.createElement('div');
+            novaLinha.className = 'row mb-3 p-2 border rounded item-row';
+            
+            var itemId = Date.now() + contadorItens;
+            novaLinha.setAttribute('data-item-id', itemId);
+
+            var servicoSelecionado = document.getElementById('tipoServico').value;
+            var servicoIdReal = mapaServicos[servicoSelecionado] || 1;
+
+            var options = '<option value="">Selecione...</option>';
+            roupas.forEach(r => {
+                options += `<option value="${servicoIdReal}" data-preco="${r.precoBase}">${r.nome} - R$ ${r.precoBase.toFixed(2)}</option>`;
+            });
+
+            novaLinha.innerHTML = `
+                <div class="col-md-5">
+                    <label class="form-label">Tipo de Roupa</label>
+                    <select class="form-select tipo-roupa" required data-item="${itemId}">
+                        ${options}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Quantidade</label>
+                    <input type="number" class="form-control quantidade" min="1" value="1" required data-item="${itemId}" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Subtotal</label>
+                    <div class="form-control-plaintext subtotal fw-bold text-success" data-item="${itemId}">R$ 0,00</div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removerItem(this)" data-item="${itemId}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+
+            container.appendChild(novaLinha);
+
+            var select = novaLinha.querySelector('.tipo-roupa');
+            var quantidade = novaLinha.querySelector('.quantidade');
+
+            select.addEventListener('change', handleItemChange);
+            quantidade.addEventListener('input', handleItemChange);
+
+            setTimeout(() => {
+                handleItemChange.call(quantidade);
+            }, 100);
+
+            contadorItens++;
+            atualizarBotaoFinalizar();
+        }
+
+        function handleItemChange() {
+            calcularSubtotal(this);
+            calcularTotal();
+        }
+
+        function calcularSubtotal(elemento) {
+            var row = elemento.closest('.item-row');
+            if (!row) return;
+            
+            var select = row.querySelector('.tipo-roupa');
+            var quantidade = row.querySelector('.quantidade');
+            var subtotalDiv = row.querySelector('.subtotal');
+
+            if (select && select.value && quantidade && quantidade.value) {
+                var preco = parseFloat(select.selectedOptions[0]?.dataset.preco) || 0;
+                var qtd = parseInt(quantidade.value) || 0;
+                var total = preco * qtd;
+                
+                subtotalDiv.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+                return total;
+            } else {
+                subtotalDiv.textContent = 'R$ 0,00';
+                return 0;
+            }
+        }
+
+        function calcularTotal() {
+            var totalGeral = 0;
+            var itensValidos = 0;
+            
+            document.querySelectorAll('.item-row').forEach(row => {
+                var select = row.querySelector('.tipo-roupa');
+                var quantidade = row.querySelector('.quantidade');
+                
+                if (select && select.value && quantidade && quantidade.value) {
+                    var preco = parseFloat(select.selectedOptions[0]?.dataset.preco) || 0;
+                    var qtd = parseInt(quantidade.value) || 0;
+                    totalGeral += preco * qtd;
+                    itensValidos++;
+                }
+            });
+            
+            document.getElementById('valorTotal').textContent = `R$ ${totalGeral.toFixed(2).replace('.', ',')}`;
+            document.getElementById('btnFinalizar').disabled = (itensValidos === 0);
+        }
+
+        function removerItem(botao) {
+            botao.closest('.item-row').remove();
+            calcularTotal();
+            atualizarBotaoFinalizar();
+        }
+
+        function atualizarBotaoFinalizar() {
+            var temItens = document.querySelectorAll('.item-row').length > 0;
+            document.getElementById('btnFinalizar').disabled = !temItens;
+        }
+
+        // Enviar para a API
+        document.getElementById('formPedido').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var clienteId = document.getElementById('clienteId').value;
+            var tipoServico = document.getElementById('tipoServico').value;
+            var dataEntrega = document.getElementById('dataEntrega').value;
+            var observacoes = document.getElementById('observacoes').value;
+            
+            // VALIDAÇÃO CORRIGIDA: Admin não precisa de clienteId, cliente precisa
+            if (perfil !== 'Admin') {
+                if (!clienteId || clienteId === '0' || clienteId === '') {
+                    alert('Erro: ID do cliente não encontrado. Faça login novamente.');
+                    window.location.href = '/Login/Index';
+                    return;
+                }
+            } else {
+                // Para admin, se não tiver clienteId, mostra alerta mas não redireciona
+                if (!clienteId || clienteId === '0' || clienteId === '') {
+                    alert('Administrador: Selecione um cliente antes de finalizar o pedido.');
+                    return;
+                }
+            }
+            
+            var servicoIdReal = mapaServicos[tipoServico] || 1;
+            
+            var itens = [];
+            var itensValidos = 0;
+            
+            document.querySelectorAll('.item-row').forEach((row, index) => {
+                var quantidade = row.querySelector('.quantidade');
+
+                if (quantidade.value && parseInt(quantidade.value) > 0) {
+                    itens.push({
+                        servicoId: servicoIdReal,
+                        quantidade: parseInt(quantidade.value)
+                    });
+                    itensValidos++;
+                }
+            });
+
+            if (itens.length === 0) {
+                alert('Adicione pelo menos um item válido');
+                return;
+            }
+
+            var pedidoData = {
+                clienteId: parseInt(clienteId),
+                usuarioId: parseInt(usuarioId),
+                dataPrevistaEntrega: dataEntrega ? new Date(dataEntrega).toISOString() : null,
+                status: "Aguardando",
+                observacoes: observacoes || "",
+                itensPedido: itens
+            };
+
+            fetch('http://localhost:5154/api/Pedidos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(pedidoData)
+            })
+            .then(async response => {
+                const responseText = await response.text();
+                if (response.ok) {
+                    return JSON.parse(responseText);
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${responseText}`);
+                }
+            })
+            .then(data => {
+                alert('✅ Pedido realizado com sucesso!');
+                window.location.href = '/Perfil/MeusPedidos';
+            })
+            .catch(error => {
+                console.error('Erro detalhado:', error);
+                alert('❌ Erro ao realizar pedido: ' + error.message);
+            });
+        });
+
+        // VERIFICAÇÃO CORRIGIDA NO CARREGAMENTO DA PÁGINA
+        window.onload = function() {
+            var clienteId = document.getElementById('clienteId').value;
+            
+            console.log('Perfil:', perfil);
+            console.log('ClienteId no load:', clienteId);
+            
+            // Admin NÃO é redirecionado, apenas cliente sem ID é redirecionado
+            if (perfil !== 'Admin') {
+                if (!clienteId || clienteId === '0' || clienteId === '') {
+                    alert('Erro: ID do cliente não encontrado. Você precisa estar logado como cliente.');
+                    window.location.href = '/Login/Index';
+                    return;
+                }
+            }
+            
+            setTimeout(function() {
+                var selectServico = document.getElementById('tipoServico');
+                if (selectServico.value) {
+                    document.getElementById('btnAdicionarItem').disabled = false;
+                    document.getElementById('btnAdicionarItem').click();
+                }
+            }, 500);
+        };
+    </script>
+}

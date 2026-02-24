@@ -1,0 +1,172 @@
+﻿@model SistemaLavanderia.Core.Entities.Pedido
+
+@{
+    ViewData["Title"] = "Novo Pedido";
+    var clientes = (List<SistemaLavanderia.Core.Entities.Cliente>)ViewBag.Clientes;
+    var servicos = (List<SistemaLavanderia.Core.Entities.Servico>)ViewBag.Servicos;
+}
+
+<h1>Novo Pedido</h1>
+
+<hr />
+
+@if (TempData["Erro"] != null)
+{
+    <div class="alert alert-danger">@TempData["Erro"]</div>
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Create" id="formPedido">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="ClienteId" class="control-label">Cliente</label>
+                        <select asp-for="ClienteId" class="form-control" required>
+                            <option value="">Selecione um cliente</option>
+                            @foreach (var cliente in clientes)
+                            {
+                                <option value="@cliente.Id">@cliente.Nome - @cliente.Telefone</option>
+                            }
+                        </select>
+                        <span asp-validation-for="ClienteId" class="text-danger"></span>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="form-group mb-3">
+                        <label asp-for="DataPrevistaEntrega" class="control-label">Data Prevista Entrega</label>
+                        <input asp-for="DataPrevistaEntrega" class="form-control" type="date" />
+                        <span asp-validation-for="DataPrevistaEntrega" class="text-danger"></span>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="form-group mb-3">
+                        <label class="control-label">Usuário</label>
+                        <input class="form-control" value="Admin (fixo)" readonly />
+                        <input type="hidden" asp-for="UsuarioId" value="1" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Observacoes" class="control-label">Observações</label>
+                <textarea asp-for="Observacoes" class="form-control" rows="2"></textarea>
+                <span asp-validation-for="Observacoes" class="text-danger"></span>
+            </div>
+
+            <h4 class="mt-4">Itens do Pedido</h4>
+            <hr />
+
+            <div id="itens-container">
+                <!-- Os itens serão adicionados aqui via JavaScript -->
+            </div>
+
+            <button type="button" id="btnAdicionarItem" class="btn btn-success mb-3">
+                <i class="fas fa-plus"></i> Adicionar Item
+            </button>
+
+            <div class="row mt-3">
+                <div class="col-md-4 offset-md-8">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Resumo do Pedido</h5>
+                        </div>
+                        <div class="card-body">
+                            <h3 class="text-end" id="totalGeral">R$ 0,00</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mt-4">
+                <input type="submit" value="Salvar Pedido" class="btn btn-primary btn-lg" />
+                <a asp-action="Index" class="btn btn-secondary btn-lg">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var servicos = @Html.Raw(Json.Serialize(servicos));
+        var contadorItens = 0;
+
+        function formatarMoeda(valor) {
+            return 'R$ ' + valor.toFixed(2).replace('.', ',');
+        }
+
+        function calcularTotalItem(select) {
+            var row = select.closest('.item-row');
+            var servicoId = select.value;
+            var quantidade = row.querySelector('.quantidade').value;
+            
+            if (servicoId && quantidade) {
+                var servico = servicos.find(s => s.id == servicoId);
+                var preco = servico ? servico.precoBase : 0;
+                var total = preco * quantidade;
+                row.querySelector('.total-item').textContent = formatarMoeda(total);
+            }
+            
+            calcularTotalGeral();
+        }
+
+        function calcularTotalGeral() {
+            var total = 0;
+            document.querySelectorAll('.total-item').forEach(function(el) {
+                var valor = el.textContent.replace('R$ ', '').replace('.', '').replace(',', '.');
+                total += parseFloat(valor) || 0;
+            });
+            document.getElementById('totalGeral').textContent = formatarMoeda(total);
+        }
+
+        function removerItem(botao) {
+            botao.closest('.item-row').remove();
+            calcularTotalGeral();
+        }
+
+        document.getElementById('btnAdicionarItem').addEventListener('click', function() {
+            var container = document.getElementById('itens-container');
+            var novaLinha = document.createElement('div');
+            novaLinha.className = 'row item-row mb-3 p-3 border rounded';
+            novaLinha.style.backgroundColor = '#f8f9fa';
+            
+            var options = '';
+            servicos.forEach(function(servico) {
+                options += `<option value="${servico.id}">${servico.nome} - ${formatarMoeda(servico.precoBase)} (${servico.unidadeMedida})</option>`;
+            });
+
+            novaLinha.innerHTML = `
+                <div class="col-md-5">
+                    <label class="form-label">Serviço</label>
+                    <select name="servicoIds" class="form-control servico-select" onchange="calcularTotalItem(this)" required>
+                        <option value="">Selecione...</option>
+                        ${options}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Quantidade</label>
+                    <input type="number" name="quantidades" class="form-control quantidade" min="1" value="1" onchange="calcularTotalItem(this)" required />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Subtotal</label>
+                    <div class="form-control-plaintext total-item fw-bold">R$ 0,00</div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger" onclick="removerItem(this)">
+                        <i class="fas fa-trash"></i> Remover
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(novaLinha);
+            contadorItens++;
+        });
+
+        // Adicionar um item por padrão
+        document.getElementById('btnAdicionarItem').click();
+    </script>
+}
